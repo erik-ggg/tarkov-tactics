@@ -7,12 +7,13 @@ import { UserService } from '../_services';
 
 @Component({ templateUrl: 'home.component.html', styleUrls: ['./home.component.css'] })
 export class HomeComponent implements OnInit, AfterViewInit {
-    currentUser: User;
     insertingMultimedia = false;
     canvas: HTMLCanvasElement;
-    context: CanvasRenderingContext2D;
-    canvasState: string[]; // undo states
     canvasRedoState: string[]; // redo states
+    canvasState: string[]; // undo states
+    color: HTMLInputElement;
+    context: CanvasRenderingContext2D;
+    currentUser: User;
 
     constructor(private userService: UserService) {
         this.currentUser = JSON.parse(localStorage.getItem('currentUser'));
@@ -23,9 +24,10 @@ export class HomeComponent implements OnInit, AfterViewInit {
         this.canvasRedoState = new Array();
         this.canvasState = new Array();
         this.context = this.canvas.getContext('2d');
+        this.color = <HTMLInputElement>document.getElementById('colorInput');
     }
     ngAfterViewInit(): void {
-        this.captureEvents(this.canvas);
+        this.captureEvents(this.canvas, this.color);
     }
 
     public loadWoods() {
@@ -37,14 +39,15 @@ export class HomeComponent implements OnInit, AfterViewInit {
             if (img.complete) {
                 self.canvas.height = img.height;
                 self.canvas.width = img.width;
-                self.canvas.hidden = false;
+                document.getElementById('toolbar').hidden = false;
+                document.getElementById('container').hidden = false;
             }
         };
     }
 
     public loadCustoms() {
         const img = <HTMLImageElement>document.getElementById('mapImage');
-        img.src = '../assets/images/customs_map.jpg';
+        img.src = '../../assets/img/customs_map.jpg';
         const self = this;
         img.onload = function () {
             if (img.complete) {
@@ -56,7 +59,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
 
     public loadShoreline() {
         const img = <HTMLImageElement>document.getElementById('mapImage');
-        img.src = '../assets/images/shoreline_map.jpg';
+        img.src = '../../assets/img/shoreline_map.jpg';
         const self = this;
         img.onload = function () {
             if (img.complete) {
@@ -119,7 +122,14 @@ export class HomeComponent implements OnInit, AfterViewInit {
 
     }
 
-    private captureEvents(canvas: HTMLCanvasElement) {
+    private captureEvents(canvas: HTMLCanvasElement, color: HTMLInputElement) {
+        // detects changes in the color input
+        // and change the canvas line color
+        Observable
+            .fromEvent(color, 'input')
+            .subscribe(() => {
+                this.context.strokeStyle = color.value;
+            });
 
         Observable
             .fromEvent(canvas, 'mousedown')
