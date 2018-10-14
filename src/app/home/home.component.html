@@ -1,0 +1,32 @@
+﻿<nav class="navbar navbar-dark bg-dark">
+    <a class="navbar-brand" href="/">Home</a>
+    <div class="navbar-expand mr-auto">
+        <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="newMapDropdownMenuButton" data-toggle="dropdown"
+                aria-haspopup="true" aria-expanded="false">
+                New map
+            </button>
+            <div class="dropdown-menu" aria-labelledby="newMapDropdownMenuButton">
+                <a class="dropdown-item" (click)="loadWoods()" href="#">Woods</a>
+                <a class="dropdown-item" href="#">Customs</a>
+                <a class="dropdown-item" href="#">Shoreline</a>
+            </div>
+        </div>
+    </div>
+    <a [routerLink]="['/login']">Logout</a>
+</nav>
+<!-- Toolbar -->
+<nav class="navbar navbar-dark bg-dark">
+    <div class="navbar-expand mr-auto">
+        <button id="enlarge_button" class="btn btn-secondary" (click)="enlarge()">+</button>
+        <button id="shrink_button" class="btn btn-secondary" (click)="shrink()">-</button>
+        <button id="undo_button" class="btn btn-secondary" (click)="undo()">Undo</button>
+        <button id="redo_button" class="btn btn-secondary" (click)="redo()">Redo</button>
+        <button id="save_button" class="btn btn-secondary" (click)="save()">Save</button>
+    </div>
+</nav>
+<div id="container">
+    <img id="mapImage" hidden>
+    <canvas id="mapCanvas" width="200" height="100" style="border:1px solid #000000;" hidden>
+    </canvas>
+</div>
