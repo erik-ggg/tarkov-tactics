@@ -30,10 +30,15 @@ export class HomeComponent implements OnInit, AfterViewInit {
         this.captureEvents(this.canvas, this.color);
     }
 
-    public loadWoods() {
+    /**
+     * Load the selected map and put the attribute hidden of toolbar and canvas
+     * to false
+     * @param map the map the user wants to edit
+     */
+    public loadMap(map: String) {
         const img = <HTMLImageElement>document.getElementById('mapImage');
         img.hidden = false;
-        img.src = '../../assets/img/woods_map.jpg';
+        img.src = '../../assets/img/' + map;
         const self = this;
         img.onload = function () {
             if (img.complete) {
@@ -41,30 +46,6 @@ export class HomeComponent implements OnInit, AfterViewInit {
                 self.canvas.width = img.width;
                 document.getElementById('toolbar').hidden = false;
                 document.getElementById('container').hidden = false;
-            }
-        };
-    }
-
-    public loadCustoms() {
-        const img = <HTMLImageElement>document.getElementById('mapImage');
-        img.src = '../../assets/img/customs_map.jpg';
-        const self = this;
-        img.onload = function () {
-            if (img.complete) {
-                self.canvas.height = img.height;
-                self.canvas.width = img.width;
-            }
-        };
-    }
-
-    public loadShoreline() {
-        const img = <HTMLImageElement>document.getElementById('mapImage');
-        img.src = '../../assets/img/shoreline_map.jpg';
-        const self = this;
-        img.onload = function () {
-            if (img.complete) {
-                self.canvas.height = img.height;
-                self.canvas.width = img.width;
             }
         };
     }
