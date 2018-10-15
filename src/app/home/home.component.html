@@ -1,4 +1,4 @@
-﻿<nav class="navbar navbar-dark bg-dark">
+﻿<nav id="navbar" class="navbar navbar-dark bg-dark fixed-top">
     <a class="navbar-brand" href="/">Home</a>
     <div class="navbar-expand mr-auto">
         <div class="dropdown">
@@ -16,7 +16,7 @@
     <a [routerLink]="['/login']">Logout</a>
 </nav>
 <!-- Toolbar -->
-<nav class="navbar navbar-dark bg-dark" id="toolbar" hidden>
+<nav class="navbar navbar-dark bg-dark fixed-bottom" id="toolbar" hidden>
     <div class="navbar-expand mr-auto">
         <button id="enlarge_button" class="btn btn-secondary" (click)="enlarge()">+</button>
         <button id="shrink_button" class="btn btn-secondary" (click)="shrink()">-</button>
