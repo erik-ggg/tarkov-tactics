@@ -16,12 +16,18 @@ export class UserService {
         return this.http.get(`${environment.apiUrl}/users/` + id);
     }
 
+    // login(user: User) {
+    //     return this.http.post(`${environment.apiUrl}/users/login`, user);
+    // }
+
     register(user: User) {
-        return this.http.post(`${environment.apiUrl}/users/register`, user);
+        return this.http.post(`${environment.apiUrl}/users/register`, user, {
+            headers: {}
+        });
     }
 
     update(user: User) {
-        return this.http.put(`${environment.apiUrl}/users/` + user.id, user);
+        // return this.http.put(`${environment.apiUrl}/users/` + user.id, user);
     }
 
     delete(id: number) {

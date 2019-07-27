@@ -5,6 +5,9 @@ import { Observable } from 'rxjs-compat';
 import { User } from '../_models';
 import { UserService } from '../_services';
 
+import { SocketService } from '../_services/socket.service';
+import { Event } from '../client-events';
+
 @Component({ templateUrl: 'home.component.html', styleUrls: ['./home.component.css'] })
 export class HomeComponent implements OnInit, AfterViewInit {
     insertingMultimedia = false;
@@ -14,20 +17,42 @@ export class HomeComponent implements OnInit, AfterViewInit {
     color: HTMLInputElement;
     context: CanvasRenderingContext2D;
     currentUser: User;
+    ioConnection: any;
 
-    constructor(private userService: UserService) {
+    constructor(private userService: UserService, private socketService: SocketService) {
         this.currentUser = JSON.parse(localStorage.getItem('currentUser'));
     }
 
     ngOnInit() {
+        // Init socket conexion
+        this.initSocketConexion();
+
+        // Init canvas
+        this.initCanvas();
+    }
+    ngAfterViewInit(): void {
+        this.captureEvents(this.canvas, this.color);
+    }
+
+    private initCanvas() {
         this.canvas = <HTMLCanvasElement>document.getElementById('mapCanvas');
         this.canvasRedoState = new Array();
         this.canvasState = new Array();
         this.context = this.canvas.getContext('2d');
         this.color = <HTMLInputElement>document.getElementById('colorInput');
     }
-    ngAfterViewInit(): void {
-        this.captureEvents(this.canvas, this.color);
+
+    private initSocketConexion() {
+        this.socketService.initSocket();
+        this.socketService.onEvent(Event.CONNECT)
+            .subscribe(() => {
+                console.log('connected');
+            });
+
+        this.socketService.onEvent(Event.DISCONNECT)
+            .subscribe(() => {
+                console.log('disconnected');
+            });
     }
 
     /**

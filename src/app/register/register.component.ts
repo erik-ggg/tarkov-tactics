@@ -4,8 +4,9 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { first } from 'rxjs/operators';
 
 import { AlertService, UserService } from '../_services';
+import { User } from '../_models';
 
-@Component({templateUrl: 'register.component.html'})
+@Component({ templateUrl: 'register.component.html' })
 export class RegisterComponent implements OnInit {
     registerForm: FormGroup;
     loading = false;
@@ -19,9 +20,8 @@ export class RegisterComponent implements OnInit {
 
     ngOnInit() {
         this.registerForm = this.formBuilder.group({
-            firstName: ['', Validators.required],
-            lastName: ['', Validators.required],
-            username: ['', Validators.required],
+            nickname: ['', Validators.required],
+            email: ['', Validators.required],
             password: ['', [Validators.required, Validators.minLength(6)]]
         });
     }
@@ -36,6 +36,15 @@ export class RegisterComponent implements OnInit {
         if (this.registerForm.invalid) {
             return;
         }
+        const nickname = (<HTMLInputElement>document.getElementById('nickname')).value;
+        const email = (<HTMLInputElement>document.getElementById('email')).value;
+        const password = (<HTMLInputElement>document.getElementById('password')).value;
+        const user: User = {
+            nickname: nickname,
+            email: email,
+            password: password
+        };
+        console.log(user);
 
         this.loading = true;
         this.userService.register(this.registerForm.value)
