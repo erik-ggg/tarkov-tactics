@@ -17,11 +17,19 @@ import { HomeComponent } from './home';
 import { LoginComponent } from './login';
 import { RegisterComponent } from './register';
 
+import {
+    SocialLoginModule,
+    AuthServiceConfig,
+    FacebookLoginProvider,
+    GoogleLoginProvider
+  } from 'angularx-social-login'; 
+
 @NgModule({
     imports: [
         BrowserModule,
         ReactiveFormsModule,
         HttpClientModule,
+        SocialLoginModule,
         routing
     ],
     declarations: [
@@ -33,8 +41,11 @@ import { RegisterComponent } from './register';
     ],
     providers: [
         AuthGuard,
+        AuthServiceConfig,
         AlertService,
         AuthenticationService,
+        FacebookLoginProvider,
+        GoogleLoginProvider,
         UserService,
         { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
         { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
