@@ -5,7 +5,15 @@ import { first } from 'rxjs/operators';
 
 import { AlertService, AuthenticationService } from '../_services';
 
+<<<<<<< Updated upstream
 @Component({templateUrl: 'login.component.html'})
+=======
+// Google Auth
+import { AuthService } from 'angularx-social-login';
+import { GoogleLoginProvider } from 'angularx-social-login';
+
+@Component({ templateUrl: 'login.component.html' })
+>>>>>>> Stashed changes
 export class LoginComponent implements OnInit {
     loginForm: FormGroup;
     loading = false;
@@ -17,9 +25,15 @@ export class LoginComponent implements OnInit {
         private route: ActivatedRoute,
         private router: Router,
         private authenticationService: AuthenticationService,
+<<<<<<< Updated upstream
         private alertService: AlertService) {}
+=======
+        private alertService: AlertService,
+        private authService: AuthService) { }
+>>>>>>> Stashed changes
 
     ngOnInit() {
+
         this.loginForm = this.formBuilder.group({
             username: ['', Validators.required],
             password: ['', Validators.required]
@@ -30,6 +44,14 @@ export class LoginComponent implements OnInit {
 
         // get return url from route parameters or default to '/'
         this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+    }
+
+    signInWithGoogle(): void {
+        this.authService.signIn(GoogleLoginProvider.PROVIDER_ID);
+    }
+
+    signOut(): void {
+        this.authService.signOut();
     }
 
     // convenience getter for easy access to form fields

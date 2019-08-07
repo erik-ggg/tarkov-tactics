@@ -1,5 +1,4 @@
 ﻿import { Component, OnInit, AfterViewInit } from '@angular/core';
-import { first } from 'rxjs/operators';
 import { Observable } from 'rxjs-compat';
 
 import { User } from '../_models';
@@ -14,6 +13,11 @@ export class HomeComponent implements OnInit, AfterViewInit {
     color: HTMLInputElement;
     context: CanvasRenderingContext2D;
     currentUser: User;
+<<<<<<< Updated upstream
+=======
+    idConnection: string;
+    ioConnection: any;
+>>>>>>> Stashed changes
 
     constructor(private userService: UserService) {
         this.currentUser = JSON.parse(localStorage.getItem('currentUser'));
@@ -26,8 +30,34 @@ export class HomeComponent implements OnInit, AfterViewInit {
         this.context = this.canvas.getContext('2d');
         this.color = <HTMLInputElement>document.getElementById('colorInput');
     }
+<<<<<<< Updated upstream
     ngAfterViewInit(): void {
         this.captureEvents(this.canvas, this.color);
+=======
+
+    private initSocketConexion() {
+        this.idConnection = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
+        console.log('Room id: ', this.idConnection)
+        const p = <HTMLButtonElement>document.getElementById('pcode');
+        p.textContent = this.idConnection;
+        this.socketService.initSocket(this.idConnection);
+
+        this.socketService.onData()
+            .subscribe((data: any) => {
+                console.log('receiving broadcast data on client: ', data);
+                this.drawOnCanvas(data.prevPos, data.currentPos, this.canvas);
+            });
+
+        this.socketService.onEvent(Event.CONNECT)
+            .subscribe(() => {
+                console.log('connected');
+            });
+
+        this.socketService.onEvent(Event.DISCONNECT)
+            .subscribe(() => {
+                console.log('disconnected');
+            });
+>>>>>>> Stashed changes
     }
 
     /**
@@ -156,6 +186,11 @@ export class HomeComponent implements OnInit, AfterViewInit {
             x: res[1].clientX - rect.left,
             y: res[1].clientY - rect.top
         };
+        const data = {
+            prevPos,
+            currentPos
+        };
+        this.emitData(data);
         this.drawOnCanvas(prevPos, currentPos, canvas);
     }
 
@@ -203,5 +238,9 @@ export class HomeComponent implements OnInit, AfterViewInit {
     public changeCursorVideo() {
         document.body.style.cursor = 'url(./assets/images/video_cursor.png), auto';
         this.insertingMultimedia = true;
+    }
+
+    private emitData(data: any) {
+        this.socketService.sendData(data);
     }
 }
