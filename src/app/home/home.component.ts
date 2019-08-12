@@ -2,10 +2,15 @@
 import { Observable } from 'rxjs-compat';
 
 import { User } from '../_models';
-import { UserService } from '../_services';
+import { UserService, AuthenticationService } from '../_services';
+
+import { Event } from '../client-events'
 
 @Component({ templateUrl: 'home.component.html', styleUrls: ['./home.component.css'] })
 export class HomeComponent implements OnInit, AfterViewInit {
+    [x: string]: any;
+    ngAfterViewInit(): void {
+    }
     insertingMultimedia = false;
     canvas: HTMLCanvasElement;
     canvasRedoState: string[]; // redo states
@@ -13,13 +18,10 @@ export class HomeComponent implements OnInit, AfterViewInit {
     color: HTMLInputElement;
     context: CanvasRenderingContext2D;
     currentUser: User;
-<<<<<<< Updated upstream
-=======
     idConnection: string;
     ioConnection: any;
->>>>>>> Stashed changes
 
-    constructor(private userService: UserService) {
+    constructor(private userService: UserService, private authService: AuthenticationService) {
         this.currentUser = JSON.parse(localStorage.getItem('currentUser'));
     }
 
@@ -30,10 +32,6 @@ export class HomeComponent implements OnInit, AfterViewInit {
         this.context = this.canvas.getContext('2d');
         this.color = <HTMLInputElement>document.getElementById('colorInput');
     }
-<<<<<<< Updated upstream
-    ngAfterViewInit(): void {
-        this.captureEvents(this.canvas, this.color);
-=======
 
     private initSocketConexion() {
         this.idConnection = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
@@ -57,7 +55,6 @@ export class HomeComponent implements OnInit, AfterViewInit {
             .subscribe(() => {
                 console.log('disconnected');
             });
->>>>>>> Stashed changes
     }
 
     /**
@@ -78,6 +75,10 @@ export class HomeComponent implements OnInit, AfterViewInit {
                 document.getElementById('container').hidden = false;
             }
         };
+    }
+
+    public logout() {
+        this.authService.logout();
     }
 
     /**

@@ -1,13 +1,13 @@
-﻿import { NgModule }      from '@angular/core';
+﻿import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { ReactiveFormsModule }    from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 
 // used to create fake backend
 import { fakeBackendProvider } from './_helpers';
 
-import { AppComponent }  from './app.component';
-import { routing }        from './app.routing';
+import { AppComponent } from './app.component';
+import { routing } from './app.routing';
 
 import { AlertComponent } from './_directives';
 import { AuthGuard } from './_guards';
@@ -17,16 +17,10 @@ import { HomeComponent } from './home';
 import { LoginComponent } from './login';
 import { RegisterComponent } from './register';
 
-import {
-    SocialLoginModule,
-    AuthServiceConfig,
-    FacebookLoginProvider,
-    GoogleLoginProvider
-  } from 'angularx-social-login'; 
-
 // Google Auth
 import { SocialLoginModule, AuthServiceConfig } from 'angularx-social-login';
 import { GoogleLoginProvider, FacebookLoginProvider } from 'angularx-social-login';
+import { SocketService } from './_services/socket.service';
 
 const config = new AuthServiceConfig([
     {
@@ -60,27 +54,14 @@ export function provideConfig() {
     ],
     providers: [
         AuthGuard,
-        AuthServiceConfig,
         AlertService,
         AuthenticationService,
-        FacebookLoginProvider,
-        GoogleLoginProvider,
         UserService,
-<<<<<<< Updated upstream
-        { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
-        { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
-=======
         SocketService,
         {
             provide: AuthServiceConfig,
             useFactory: provideConfig
         }
-        // { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
-        // { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
->>>>>>> Stashed changes
-
-        // provider used to create fake backend
-        fakeBackendProvider
     ],
     bootstrap: [AppComponent]
 })

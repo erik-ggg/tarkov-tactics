@@ -5,16 +5,17 @@ import { first } from 'rxjs/operators';
 
 import { AlertService, AuthenticationService } from '../_services';
 
-<<<<<<< Updated upstream
-@Component({templateUrl: 'login.component.html'})
-=======
 // Google Auth
 import { AuthService } from 'angularx-social-login';
 import { GoogleLoginProvider } from 'angularx-social-login';
+import { SocialUser } from "angularx-social-login";
 
 @Component({ templateUrl: 'login.component.html' })
->>>>>>> Stashed changes
 export class LoginComponent implements OnInit {
+
+    private user: SocialUser;
+    private loggedIn: boolean;
+
     loginForm: FormGroup;
     loading = false;
     submitted = false;
@@ -25,25 +26,19 @@ export class LoginComponent implements OnInit {
         private route: ActivatedRoute,
         private router: Router,
         private authenticationService: AuthenticationService,
-<<<<<<< Updated upstream
-        private alertService: AlertService) {}
-=======
         private alertService: AlertService,
         private authService: AuthService) { }
->>>>>>> Stashed changes
 
     ngOnInit() {
 
-        this.loginForm = this.formBuilder.group({
-            username: ['', Validators.required],
-            password: ['', Validators.required]
+        this.authService.authState.subscribe((user) => {
+            this.user = user;
+            this.loggedIn = (user != null);
+            if (this.loggedIn) {
+                localStorage.setItem('user', user.idToken);
+                this.router.navigate(['/home']);
+            }
         });
-
-        // reset login status
-        this.authenticationService.logout();
-
-        // get return url from route parameters or default to '/'
-        this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
     }
 
     signInWithGoogle(): void {
