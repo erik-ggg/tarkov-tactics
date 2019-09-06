@@ -2,9 +2,12 @@
 import { Observable } from 'rxjs-compat';
 
 import { User } from '../_models';
-import { UserService, AuthenticationService } from '../_services';
+import { UserService, AuthenticationService, AlertService } from '../_services';
+import { AuthService } from 'angularx-social-login';
 
 import { Event } from '../client-events'
+import { Action } from '../client-events'
+import { SocketService } from '../_services/socket.service';
 
 @Component({ templateUrl: 'home.component.html', styleUrls: ['./home.component.css'] })
 export class HomeComponent implements OnInit, AfterViewInit {
@@ -18,43 +21,115 @@ export class HomeComponent implements OnInit, AfterViewInit {
     color: HTMLInputElement;
     context: CanvasRenderingContext2D;
     currentUser: User;
+    currentMap: string;
+    host: string;
     idConnection: string;
     ioConnection: any;
+    isHost: boolean;
 
-    constructor(private userService: UserService, private authService: AuthenticationService) {
+    constructor(private userService: UserService, private authService: AuthenticationService, private googleAuthService: AuthService, private socketService: SocketService,
+        private alertService: AlertService) {
         this.currentUser = JSON.parse(localStorage.getItem('currentUser'));
     }
 
     ngOnInit() {
+        this.initSocketConexion();
         this.canvas = <HTMLCanvasElement>document.getElementById('mapCanvas');
         this.canvasRedoState = new Array();
         this.canvasState = new Array();
         this.context = this.canvas.getContext('2d');
         this.color = <HTMLInputElement>document.getElementById('colorInput');
+        this.captureEvents(this.canvas, this.color);
+        this.isHost = false;
     }
 
     private initSocketConexion() {
-        this.idConnection = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
-        console.log('Room id: ', this.idConnection)
         const p = <HTMLButtonElement>document.getElementById('pcode');
-        p.textContent = this.idConnection;
-        this.socketService.initSocket(this.idConnection);
+        this.socketService.initSocket();
 
-        this.socketService.onData()
+        this.socketService.onEvent(Event.CURSOR_DATA)
             .subscribe((data: any) => {
-                console.log('receiving broadcast data on client: ', data);
                 this.drawOnCanvas(data.prevPos, data.currentPos, this.canvas);
             });
 
+        this.socketService.onEvent(Event.SUCCESSFUL_JOIN)
+            .subscribe(() => {
+                this.isHost = false;
+                this.host = (<HTMLInputElement>document.getElementById('roomInput')).value;
+                this.alertService.success("Joined room successful!");
+            })
+
         this.socketService.onEvent(Event.CONNECT)
             .subscribe(() => {
-                console.log('connected');
+                console.log('Connected: ', this.socketService.socket.id);
             });
 
-        this.socketService.onEvent(Event.DISCONNECT)
-            .subscribe(() => {
-                console.log('disconnected');
+        // this.socketService.onEvent(Event.DISCONNECT)
+        //     .subscribe(() => {
+        //         this.isHost = false;
+        //         console.log('disconnected');
+        //     });
+
+        this.socketService.onEvent(Event.MAP_CHANGE)
+            .subscribe((map: string) => {
+                this.loadMap(map);
             });
+
+
+        this.socketService.onEvent(Event.MAP_REQUEST)
+            .subscribe((socketRequester: string) => {
+                console.log("DEBUG. The socket %s is asking for the map", socketRequester)
+                this.socketService.sendData(Event.MAP_REQUEST, this.currentMap, socketRequester);
+            });
+
+        this.socketService.onEvent(Event.MAP_SENDED)
+            .subscribe((map: string) => {
+                console.log("DEBUG. Receiving map %s", map)
+                this.loadMap(map);
+                // TODO: map load
+            });
+
+        this.socketService.onEvent(Event.RAISE_HOST)
+            .subscribe(() => {
+                console.log("DEBUG. Socket %s is now a host", this.socketService.socket.id);
+                this.isHost = true;
+            });
+    }
+
+    public createRoom(): void {
+        this.socketService.isOnline = true;
+    }
+
+    public copyRoomId(): void {
+        // Copy code
+        const dataDummy = document.createElement("input");
+        document.body.appendChild(dataDummy);
+        dataDummy.value = this.socketService.socket.id;
+        dataDummy.select();
+        document.execCommand("copy");
+        document.body.removeChild(dataDummy)
+
+        //Alert Service
+        this.alertService.success("Room ID copied to clipboard!");
+    }
+
+    public joinRoom(): void {
+        const input = <HTMLInputElement>document.getElementById('roomInput');
+        if (input.value) {
+            this.socketService.sendEvent(Event.JOINING, input.value);
+            (<HTMLButtonElement>document.getElementById('leaveRoomButton')).hidden = false;
+        }
+        else
+            this.alertService.error("Introduce the room id for joining.")
+    }
+
+    public leaveRoom(): void {
+        // Interface code
+        const btn = <HTMLButtonElement>document.getElementById('leaveRoomButton');
+        btn.hidden = true;
+        // Socket code
+        this.host = "";
+        this.socketService.sendEvent(Event.DISCONNECT);
     }
 
     /**
@@ -62,8 +137,13 @@ export class HomeComponent implements OnInit, AfterViewInit {
      * to false
      * @param map the map the user wants to edit
      */
-    public loadMap(map: String) {
+    public loadMap(map: string) {
+        // Send the new map to all sockets subscribed
+        if (this.isHost)
+            this.socketService.sendData(Event.MAP_CHANGE, map);
+        // Load the map
         const img = <HTMLImageElement>document.getElementById('mapImage');
+        this.currentMap = map;
         img.hidden = false;
         img.src = '../../assets/img/' + map;
         const self = this;
@@ -78,6 +158,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
     }
 
     public logout() {
+        this.googleAuthService.signOut();
         this.authService.logout();
     }
 
@@ -191,7 +272,10 @@ export class HomeComponent implements OnInit, AfterViewInit {
             prevPos,
             currentPos
         };
-        this.emitData(data);
+        if (this.isHost)
+            this.socketService.sendData(Event.CURSOR_DATA, data, this.socketService.socket.id);
+        else
+            this.socketService.sendData(Event.CURSOR_DATA, data, this.host);
         this.drawOnCanvas(prevPos, currentPos, canvas);
     }
 
@@ -239,9 +323,5 @@ export class HomeComponent implements OnInit, AfterViewInit {
     public changeCursorVideo() {
         document.body.style.cursor = 'url(./assets/images/video_cursor.png), auto';
         this.insertingMultimedia = true;
-    }
-
-    private emitData(data: any) {
-        this.socketService.sendData(data);
     }
 }

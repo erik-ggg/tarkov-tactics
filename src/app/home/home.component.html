@@ -13,15 +13,13 @@
             </div>
         </div>
     </div>
-    <a (click)="logout()">Logout</a>
+    <button id="copyButton" (click)="copyRoomId()"><i class="glyphicon glyphicon-copy"></i></button>
+    <input type="text" id="roomInput">
+    <button id="leaveRoomButton" class="btn btn-secondary" (click)="leaveRoom()" hidden="true">Leave room</button>
+    <button class="btn btn-secondary" (click)="joinRoom()">Join room</button>
+    <button class="btn btn-secondary" (click)="createRoom()">Create room</button>
+    <a (click)="logout()" href="/login">Logout</a>
 </nav>
-<!-- Test only -->
-<div id="test">
-    <button id=pcode></button>
-    <textarea>Introduce here the room code!</textarea>
-    <button>Join</button>
-
-</div>
 <!-- Toolbar -->
 <nav class="navbar navbar-dark bg-dark" id="toolbar" hidden>
     <div class="navbar-expand mr-auto">
